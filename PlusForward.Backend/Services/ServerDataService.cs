@@ -13,12 +13,15 @@ public class ServerDataService
     private readonly IConfiguration _config;
     private readonly PlusForwardDbContext _db;
     private readonly ILogger<ServerDataService> _logger;
+    private readonly IHttpContextAccessor _httpContextAccessor;
 
-    public ServerDataService(IConfiguration config, PlusForwardDbContext db, ILogger<ServerDataService> logger)
+    public ServerDataService(IConfiguration config, PlusForwardDbContext db, 
+        ILogger<ServerDataService> logger, IHttpContextAccessor httpContextAccessor)
     {
         _config = config;
         _db = db;
         _logger = logger;
+        _httpContextAccessor = httpContextAccessor;
     }
 
     public async Task<string> AddNewServerEntry(ServerDataDto serverDataDto, CancellationToken cancellationToken)
@@ -39,7 +42,7 @@ public class ServerDataService
             MySqlCommand command = new MySqlCommand("AddServerEntry", connection);
             command.CommandType = CommandType.StoredProcedure;
             command.Parameters.AddWithValue("_ServerId", serverId);
-            command.Parameters.AddWithValue("_IpAddress", serverDataDto.IpAddress);
+            command.Parameters.AddWithValue("_IpAddress", GetUserIpAddress());
             command.Parameters.AddWithValue("_ServerName", serverDataDto.ServerName);
             command.Parameters.AddWithValue("_MapName", serverDataDto.MapName);
             command.Parameters.AddWithValue("_CurrentPlayers", 0);
@@ -94,5 +97,17 @@ public class ServerDataService
     public async Task<ServerData> GetServerData(string serverId, CancellationToken cancellationToken)
     {
         return await _db.ServersData.Where(x => x.ServerId == serverId).FirstAsync(cancellationToken);
+    }
+
+    private string GetUserIpAddress()
+    {
+        var remoteUserIpAddress = _httpContextAccessor.HttpContext?.Connection.RemoteIpAddress;
+        string userIpAddress = remoteUserIpAddress?.ToString() ?? throw new Exception("User Remote IP Address not found");
+        if (userIpAddress == "::1")
+        {
+            userIpAddress = "127.0.0.1";
+        }
+
+        return userIpAddress;
     }
 }

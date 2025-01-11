@@ -11,6 +11,7 @@ IConfiguration config = builder.Configuration;
 
 services.AddControllers();
 
+services.AddHttpContextAccessor();
 services.AddDbContextFactory<PlusForwardDbContext>(
     options => options.UseMySql(config.GetConnectionString("Default"),
         ServerVersion.AutoDetect(config.GetConnectionString("Default"))));
