@@ -21,14 +21,14 @@ public class ServerDataService
         _logger = logger;
     }
 
-    public async Task<bool> TryAddNewServerEntry(ServerDataDto serverDataDto, CancellationToken cancellationToken)
+    public async Task<string> AddNewServerEntry(ServerDataDto serverDataDto, CancellationToken cancellationToken)
     {
-        bool success = false;
+        string serverId = Guid.NewGuid().ToString("N");
         bool serverDataDtoCheck = serverDataDto.ServerDataDtoCheck(_logger);
         
         if (!serverDataDtoCheck)
         {
-            return success;
+            return "-1";
         }
         
         MySqlConnection connection = new MySqlConnection(_config.GetConnectionString("Default"));
@@ -38,8 +38,8 @@ public class ServerDataService
 
             MySqlCommand command = new MySqlCommand("AddServerEntry", connection);
             command.CommandType = CommandType.StoredProcedure;
-
-            command.Parameters.AddWithValue("_ServerId", Guid.NewGuid().ToString("N"));
+            
+            command.Parameters.AddWithValue("_ServerId", serverId);
             command.Parameters.AddWithValue("_IpAddress", serverDataDto.IpAddress);
             command.Parameters.AddWithValue("_ServerName", serverDataDto.ServerName);
             command.Parameters.AddWithValue("_MapName", serverDataDto.MapName);
@@ -51,15 +51,14 @@ public class ServerDataService
         catch (Exception exception)
         {
             _logger.Log(LogLevel.Error, exception.Message);
-            return success;
+            return "-1";
         }
         finally
         {
-            success = true;
             await connection.CloseAsync();
         }
 
-        return success;
+        return serverId;
     }
 
     public async Task<List<ServerData>> GetAllServerData(CancellationToken cancellationToken)

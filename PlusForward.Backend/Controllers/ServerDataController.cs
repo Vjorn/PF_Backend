@@ -19,7 +19,7 @@ public class ServerDataController : ControllerBase
     [HttpPost]
     public async Task<IActionResult> AddNewServerEntry(ServerDataDto serverDataDto, CancellationToken cancellationToken)
     {
-        bool result = await _serverDataService.TryAddNewServerEntry(serverDataDto, cancellationToken);
+        string result = await _serverDataService.AddNewServerEntry(serverDataDto, cancellationToken);
         return Ok(result);
     }
 
