@@ -22,6 +22,13 @@ public class ServerDataController : ControllerBase
         string result = await _serverDataService.AddNewServerEntry(serverDataDto, cancellationToken);
         return Ok(result);
     }
+    
+    [HttpDelete]
+    public async Task<IActionResult> RemoveServerEntry(string serverId, CancellationToken cancellationToken)
+    {
+        string result = await _serverDataService.RemoveServerEntry(serverId, cancellationToken);
+        return Ok(result);
+    }
 
     [HttpGet]
     public async Task<IActionResult> GetAllServerData(CancellationToken cancellationToken)
