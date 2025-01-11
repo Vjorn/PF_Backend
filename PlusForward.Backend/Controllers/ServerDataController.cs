@@ -24,10 +24,10 @@ public class ServerDataController : ControllerBase
     }
     
     [HttpDelete]
-    public async Task<IActionResult> RemoveServerEntry(string serverId, CancellationToken cancellationToken)
+    public async Task<IActionResult> RemoveServerEntry(CancellationToken cancellationToken)
     {
-        string result = await _serverDataService.RemoveServerEntry(serverId, cancellationToken);
-        return Ok(result);
+        bool success = await _serverDataService.RemoveServerEntry(cancellationToken);
+        return Ok(success);
     }
 
     [HttpGet]

@@ -11,9 +11,9 @@ namespace PlusForward.Backend.Migrations
         protected override void Up(MigrationBuilder migrationBuilder)
         {
             migrationBuilder.Sql(@"
-CREATE PROCEDURE RemoveServerEntry(_ServerId VARCHAR(36))
+CREATE PROCEDURE RemoveServerEntry(_IpAddress VARCHAR(15))
 BEGIN
-    DELETE FROM ServersData WHERE ServerId = _ServerId;
+    DELETE FROM ServersData WHERE IpAddress = _IpAddress;
 END");
         }
 

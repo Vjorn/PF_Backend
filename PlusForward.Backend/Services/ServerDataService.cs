@@ -39,7 +39,12 @@ public class ServerDataService
         {
             await connection.OpenAsync(cancellationToken);
 
-            MySqlCommand command = new MySqlCommand("AddServerEntry", connection);
+            MySqlCommand command = new MySqlCommand("RemoveServerEntry", connection);
+            command.CommandType = CommandType.StoredProcedure;
+            command.Parameters.AddWithValue("_IpAddress", GetUserIpAddress());
+            await command.ExecuteNonQueryAsync(cancellationToken);
+            
+            command = new MySqlCommand("AddServerEntry", connection);
             command.CommandType = CommandType.StoredProcedure;
             command.Parameters.AddWithValue("_ServerId", serverId);
             command.Parameters.AddWithValue("_IpAddress", GetUserIpAddress());
@@ -63,7 +68,7 @@ public class ServerDataService
         return serverId;
     }
 
-    public async Task<string> RemoveServerEntry(string serverId, CancellationToken cancellationToken)
+    public async Task<bool> RemoveServerEntry(CancellationToken cancellationToken)
     {
         MySqlConnection connection = new MySqlConnection(_config.GetConnectionString("Default"));
         try
@@ -72,21 +77,20 @@ public class ServerDataService
 
             MySqlCommand command = new MySqlCommand("RemoveServerEntry", connection);
             command.CommandType = CommandType.StoredProcedure;
-            command.Parameters.AddWithValue("_ServerId", serverId);
-            
+            command.Parameters.AddWithValue("_IpAddress", GetUserIpAddress());
             await command.ExecuteNonQueryAsync(cancellationToken);
         }
         catch (Exception exception)
         {
             _logger.Log(LogLevel.Error, exception.Message);
-            return "-1";
+            return false;
         }
         finally
         {
             await connection.CloseAsync();
         }
 
-        return serverId;
+        return true;
     }
     
     public async Task<List<ServerData>> GetAllServerData(CancellationToken cancellationToken)
